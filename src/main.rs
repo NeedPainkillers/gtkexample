@@ -1,3 +1,8 @@
+#![windows_subsystem = "windows"]
+#![cfg_attr(not(feature = "gtk_3_10"), allow(unused_variables, unused_mut))]
+#![crate_type = "bin"]
+
+
 extern crate gio;
 extern crate glib;
 extern crate gtk;
@@ -6,9 +11,27 @@ use gio::prelude::*;
 use glib::clone;
 use gtk::prelude::*;
 use gtk::{IconSize, Orientation, ReliefStyle, Widget, Entry, Box, Button, Application, ApplicationWindow};
+
+use std::env::args;
 use std::fs::File;
 use std::io::prelude::*;
 
+mod form;
+use form::*;
+
+fn main() {
+    let application =
+        gtk::Application::new(Some("rwform.gtk.example"), Default::default())
+            .expect("Initialization failed...");
+
+    application.connect_activate(|app| {
+        build_ui(app);
+    });
+    //&args().collect::<Vec<_>>()
+    application.run(&args().collect::<Vec<_>>());
+}
+
+/* old main
 fn main() {
     let application = Application::new(
         Some("com.github.gtk-rs.examples.basic"),
@@ -47,3 +70,4 @@ fn main() {
 
     application.run(&[]);
 }
+*/
