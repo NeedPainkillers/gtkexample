@@ -27,7 +27,7 @@ fn main() {
     application.connect_activate(|app| {
         build_ui(app);
     });
-    //&args().collect::<Vec<_>>()
+
     application.run(&args().collect::<Vec<_>>());
 }
 
