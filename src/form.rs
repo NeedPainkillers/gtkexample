@@ -9,6 +9,7 @@ use glib::clone;
 use gtk::prelude::*;
 use gtk::{ApplicationWindow, Builder, Button, Grid};
 use gtk::MenuItem;
+use gtk::prelude::GridExt;
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -27,6 +28,24 @@ pub fn build_ui(application: &gtk::Application) {
     let open_button: gtk::MenuItem = builder.get_object("imagemenuitem12").expect("Couldn't get open button from menu bar");
 
     let paned: gtk::Paned = builder.get_object("paned1").expect("Couldn't get paned");
+    let grid: gtk::Grid = builder.get_object("grid1").expect("Couldn't get grid");
+
+    let add_button: gtk::Button = builder.get_object("button1").expect("Couldn't get add button");
+
+    //let mut i = 1i32;
+    add_button.connect_clicked(clone!(@weak window => move |_| {
+        let entry1 = gtk::Entry::new();
+        let entry2 = gtk::Entry::new();
+        let entry3 = gtk::Entry::new();
+
+        println!("smth");
+
+        grid.attach(&entry1, 0, 1 /*row*/, 1, 1);
+        grid.attach_next_to(&entry2, Some(&entry1),gtk::PositionType::Right,1,1);
+        grid.attach_next_to(&entry3, Some(&entry2),gtk::PositionType::Right,1,1);
+    }));
+
+
 
     open_button.connect_activate(clone!(@weak window => move |_| {
         let file_chooser = gtk::FileChooserDialog::new(
