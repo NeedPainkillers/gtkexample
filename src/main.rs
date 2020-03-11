@@ -8,16 +8,14 @@ extern crate glib;
 extern crate gtk;
 
 use gio::prelude::*;
-use glib::clone;
 use gtk::prelude::*;
-use gtk::{IconSize, Orientation, ReliefStyle, Widget, Entry, Box, Button, Application, ApplicationWindow};
 
 use std::env::args;
-use std::fs::File;
-use std::io::prelude::*;
 
 mod form;
 use form::*;
+mod libs;
+use libs::app;
 
 fn main() {
     let application =
@@ -27,6 +25,7 @@ fn main() {
     application.connect_activate(|app| {
         build_ui(app);
     });
+
 
     application.run(&args().collect::<Vec<_>>());
 }
