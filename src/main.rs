@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 #![cfg_attr(not(feature = "gtk_3_10"), allow(unused_variables, unused_mut))]
 #![crate_type = "bin"]
+#![allow(dead_code)]
 
 
 extern crate gio;

@@ -1,10 +1,11 @@
 use gtk;
 use crate::libs::model::student::StudentList;
 
+#[derive(Clone)]
 pub struct app
 {
-    window: gtk::Window,
-    storage: StudentList
+    pub window: gtk::Window,
+    pub storage: StudentList
 }
 
 impl app
