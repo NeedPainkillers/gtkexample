@@ -1,10 +1,6 @@
-Student: id: "213", name: "1`", age: ;
-Student: id: "213", name: "1`", age: ;
-Student: id: "213", name: "1`", age: ;
-Student: id: "213", name: "1`", age: ;
-Student: id: "213", name: "1`", age: ;
-Student: id: "213", name: "1`", age: ;
-Student: id: "213", name: "1`", age: ;
-Student: id: "213", name: "1`", age: ;
-Student: id: "21312412ыаыафы", name: "1`", age: ;
-Student: id: "213", name: "1`", age: E;
+Student: id: "11", name: "asd1", age: ;
+Student: id: "21", name: "asd1", age: ;
+Student: id: "41", name: "asd1", age: ;
+Student: id: "1", name: "1", age: ;
+Student: id: "1", name: "1", age: ;
+Student: id: "1", name: "1", age: ;

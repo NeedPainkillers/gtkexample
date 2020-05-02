@@ -2,20 +2,22 @@ use gtk;
 use crate::libs::model::student::StudentList;
 
 #[derive(Clone)]
-pub struct app
+pub struct App
 {
     pub window: gtk::Window,
-    pub storage: StudentList
+    pub storage: StudentList,
+    pub idx: i32
 }
 
-impl app
+impl App
 {
-    pub fn new(window: gtk::Window) -> app
+    pub fn new(window: gtk::Window) -> App
     {
-        app
+        App
             {
                 window,
-                storage: StudentList::new()
+                storage: StudentList::new(),
+                idx: 0
             }
     }
 }

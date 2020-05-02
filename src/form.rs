@@ -4,20 +4,12 @@ extern crate gio;
 extern crate glib;
 extern crate gtk;
 
-use gio::prelude::*;
 use glib::clone;
 use gtk::prelude::*;
 use gtk::prelude::EntryExt;
-use gtk::{ApplicationWindow, Builder, Button, Grid, Entry};
-use gtk::MenuItem;
+use gtk::{Builder, Entry};
 use gtk::prelude::GridExt;
 
-use std::fs::File;
-use std::io::prelude::*;
-use std::io::BufWriter;
-use std::io::BufReader;
-
-use std::env::args;
 use std::cell::{RefCell, Cell};
 use std::rc::Rc;
 
@@ -32,7 +24,7 @@ pub fn build_ui(application: &gtk::Application) {
     let window: gtk::Window = builder.get_object("window1").expect("Couldn't get window");
     window.set_application(Some(application));
 
-    let mut app = Rc::new(RefCell::new(app::new(window.clone())));
+    let mut app = Rc::new(RefCell::new(App::new(window.clone())));
 
     //this item used to storage entry fields in order to add it to resulting List of students
     let mut student = Rc::new(RefCell::new(Student {id: "".to_string(), name: "".to_string(), age: 0u8, _id_internal: -1i32}));
@@ -73,8 +65,8 @@ pub fn build_ui(application: &gtk::Application) {
 
     let add_button: gtk::Button = builder.get_object("button1").expect("Couldn't get add button");
     let mut i = Rc::new(Cell::new(1));
-    add_button.connect_clicked(clone!(@weak window, @strong i, @strong student, @strong app => move |_| {
-    //TODO: read from libs binded to entry fields and add result to LinkedList which will be written to file
+    // Adding to grid
+    add_button.connect_clicked(clone!(@weak window, @strong i, @strong student, @strong app, @weak builder => move |_| {
         let grid: gtk::Grid = builder.get_object("grid1").expect("Couldn't get grid");
         let entry1 = Entry::new();
         let entry2 = Entry::new();
@@ -87,15 +79,15 @@ pub fn build_ui(application: &gtk::Application) {
             entry1.set_text(borrowed.borrow().borrow().id.as_str());
             entry2.set_text(borrowed.borrow().borrow().name.as_str());
             entry3.set_text(borrowed.borrow().borrow().age.to_string().as_str());
-            //RcRefStudent::new(Student {id: borrowed.borrow().borrow().id.as_str().to_string(), name: borrowed.borrow().borrow().name.as_str().to_string(), age: borrowed.borrow().borrow().age})
+
             Rc::new(RefCell::new(Student {
               id: borrowed.borrow().borrow().id.as_str().to_string(),
               name: borrowed.borrow().borrow().name.as_str().to_string(),
               age: borrowed.borrow().borrow().age,
-              _id_internal: -1i32})) //TODO: save current id somewhere
+              _id_internal: app.as_ref().borrow().borrow().idx}))
         };
-        //TODO: check this
         app.borrow_mut().storage.add(item.clone());
+        app.borrow_mut().idx += 1;
 
         entry1.connect_changed(clone!(@strong item, @weak entry1 => move |_|
         {
@@ -105,7 +97,7 @@ pub fn build_ui(application: &gtk::Application) {
         {
             item.borrow_mut().name = entry2.get_text().expect("Couldn't get text from id entry").to_string();
         }));
-        entry2.connect_changed(clone!(@strong item, @weak entry3 => move |_|
+        entry3.connect_changed(clone!(@strong item, @weak entry3 => move |_|
         {
              if entry3.get_text().expect("Couldn't get text from age entry").to_string().trim().is_empty()
              {
@@ -120,7 +112,6 @@ pub fn build_ui(application: &gtk::Application) {
         delete_button.connect_clicked(clone!(@strong item, @weak entry1, @weak entry2, @weak entry3,
          @weak delete_button, @weak app, @weak grid => move |_|
         {
-        //TODO: saving id internal locally to avoid unnecessary dereferencing
              app.borrow_mut().storage.delete(item.as_ref().borrow().borrow()._id_internal);
              grid.remove(&entry1);
              grid.remove(&entry2);
@@ -133,16 +124,30 @@ pub fn build_ui(application: &gtk::Application) {
         grid.attach_next_to(&entry3, Some(&entry2),gtk::PositionType::Right,1,1);
         grid.attach_next_to(&delete_button, Some(&entry3),gtk::PositionType::Right,1,1);
         (*i).set((*i).get()+1);
-
-
-        //app.borrow_mut().storage.write_to_file(&"test".to_string());
+        app.borrow_mut().idx = (*i).get() - 1;
 
         window.show_all();
     }));
 
 
     //reader
-    open_button.connect_activate(clone!(@weak window => move |_| {
+    open_button.connect_activate(clone!(@weak window, @weak app, @strong i => move |_| {
+        // Clear grid
+        let grid: gtk::Grid = builder.get_object("grid1").expect("Couldn't get grid");
+        loop
+        {
+            if grid.get_child_at(0,1) != None
+            {
+                grid.remove_row(1);
+            }
+            else
+            {
+                break;
+            }
+        }
+        app.borrow_mut().storage.storage.clear();
+        (*i).set(1);
+
         let file_chooser = gtk::FileChooserDialog::new(
             Some("Open File"),
             Some(&window),
@@ -154,19 +159,65 @@ pub fn build_ui(application: &gtk::Application) {
         ]);
         if file_chooser.run() == gtk::ResponseType::Ok {
             let filename = file_chooser.get_filename().expect("Couldn't get filename");
-            let file = File::open(&filename).expect("Couldn't open file");
 
-            let mut reader = BufReader::new(file);
-            let mut contents = String::new();
-            let _ = reader.read_to_string(&mut contents);
-            //TODO: parse content and show it on screen
-            //text_view
-            //    .get_buffer()
-            //    .expect("Couldn't get window")
-            //    .set_text(&contents);
+            // Reading from file
+            app.borrow_mut().storage.read_from_file(filename.as_path());
+
+            // Adding data to ui
+
+            for item in app.borrow_mut().storage.storage.clone()
+            {
+                let entry1 = Entry::new();
+                let entry2 = Entry::new();
+                let entry3 = Entry::new();
+                let delete_button = gtk::Button::new();
+
+                entry1.set_text(item.as_ref().borrow().borrow().id.as_str());
+                entry2.set_text(item.as_ref().borrow().borrow().name.as_str());
+                entry3.set_text(item.as_ref().borrow().borrow().age.to_string().as_str());
+
+                entry1.connect_changed(clone!(@strong item, @weak entry1 => move |_|
+                    {
+                        item.borrow_mut().id = entry1.get_text().expect("Couldn't get text from id entry").to_string();
+                    }));
+                entry2.connect_changed(clone!(@strong item, @weak entry2 => move |_|
+                    {
+                        item.borrow_mut().name = entry2.get_text().expect("Couldn't get text from id entry").to_string();
+                    }));
+                entry3.connect_changed(clone!(@strong item, @weak entry3 => move |_|
+                    {
+                         if entry3.get_text().expect("Couldn't get text from age entry").to_string().trim().is_empty()
+                         {
+                            return;
+                         }
+                         let value = entry3.get_text().expect("Couldn't get text from age entry").to_string().trim().parse();
+                         match value {
+                         Ok(x) => item.borrow_mut().age = x,
+                         Err(e) => entry3.set_text(format!("ERROR INPUT {:?}", e).as_str())
+                         }
+                    }));
+
+                delete_button.connect_clicked(clone!(@strong item, @weak entry1, @weak entry2, @weak entry3,
+                     @weak delete_button, @weak app, @weak grid => move |_|
+                    {
+                         app.borrow_mut().storage.delete(item.as_ref().borrow().borrow()._id_internal);
+                         grid.remove(&entry1);
+                         grid.remove(&entry2);
+                         grid.remove(&entry3);
+                         grid.remove(&delete_button);
+                    }));
+
+                grid.attach(&entry1, 0, (*i).get() /*row*/, 1, 1);
+                grid.attach_next_to(&entry2, Some(&entry1),gtk::PositionType::Right,1,1);
+                grid.attach_next_to(&entry3, Some(&entry2),gtk::PositionType::Right,1,1);
+                grid.attach_next_to(&delete_button, Some(&entry3),gtk::PositionType::Right,1,1);
+                (*i).set((*i).get()+1);
+                //app.borrow_mut().idx = (*i).get() - 1;
+            }
         }
 
         file_chooser.destroy();
+        window.show_all();
     }));
 
     write_button.connect_activate(clone!(@weak window, @weak app => move |_| {
