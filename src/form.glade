@@ -2,6 +2,8 @@
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkWindow" id="window1">
+    <property name="width_request">800</property>
+    <property name="height_request">450</property>
     <property name="can_focus">False</property>
     <property name="window_position">center-always</property>
     <child>
@@ -170,6 +172,8 @@
           <object class="GtkPaned" id="paned1">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="position">540</property>
+            <property name="position_set">True</property>
             <child>
               <object class="GtkBox" id="viewbox4">
                 <property name="visible">True</property>
@@ -187,6 +191,24 @@
                           <object class="GtkGrid" id="grid1">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
+                            <child>
+                              <placeholder/>
+                            </child>
                             <child>
                               <placeholder/>
                             </child>
@@ -252,23 +274,11 @@
                     <property name="margin_top">10</property>
                     <property name="margin_bottom">32</property>
                     <property name="resize_mode">immediate</property>
-                    <property name="spacing">2</property>
-                    <child>
-                      <object class="GtkButton" id="savebutton">
-                        <property name="label" translatable="yes">Save</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
+                    <property name="spacing">1</property>
                     <child>
                       <object class="GtkButton" id="button1">
                         <property name="label" translatable="yes">Add</property>
+                        <property name="height_request">50</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -276,14 +286,14 @@
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="pack_type">end</property>
+                        <property name="padding">1</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">True</property>
-                    <property name="fill">True</property>
+                    <property name="fill">False</property>
                     <property name="pack_type">end</property>
                     <property name="position">3</property>
                   </packing>
