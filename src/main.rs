@@ -24,6 +24,5 @@ fn main() {
         build_ui(app);
     });
 
-
     application.run(&args().collect::<Vec<_>>());
 }
